@@ -8,7 +8,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.2.25"
+    "minireset.css": "^0.0.7",
+    "pinia": "^2.0.14",
+    "vue": "^3.2.25",
+    "vue-router": "4",
+    "vue3-openlayers": "^0.1.68",
+    "vue-cookies": "^1.8.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",

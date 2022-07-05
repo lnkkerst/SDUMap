@@ -1,0 +1,17 @@
+{
+  "xinglongshan": [
+    {
+      "id": "xls_01",
+      "name": "1号学生宿舍",
+      "type": 4,
+      "position": [1000, 1000]
+    }
+  ],
+  "zhongxin": [],
+  "baotuquan": [],
+  "qianfoshan": [],
+  "ruanjianyuan": [],
+  "hongjialou": [],
+  "qingdao": [],
+  "weihai": []
+}
