@@ -507,7 +507,7 @@ onMounted(() => {
     display: block;
     width: 95%;
     position: fixed;
-    top: 7rem;
+    top: 3.5rem;
     left: 50%;
     transform: translateX(-50%);
     background-color: white;
