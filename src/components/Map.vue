@@ -42,6 +42,29 @@ const onClick = (marker) => {
     emit("markerClick", marker.id);
 }
 
+const contextMenuItems = ref([]);
+
+contextMenuItems.value = [
+    {
+        text: '添加标记',
+        callback: (val) => {
+            const newMarker = {};
+            newMarker.id = prompt("请输入 id: ", "none");
+            newMarker.name = prompt("请输入名称: ", "none");
+            newMarker.type = prompt("请输入类型: ", "none");
+            newMarker.position = val.coordinate;
+            props.markers.push(newMarker);
+        }
+    },
+    {
+        text: '导出当前标记',
+        callback: (val) => {
+            console.log(JSON.stringify(props.markers));
+        }
+    },
+    '-'
+]
+
 onMounted(() => {
 })
 </script>
@@ -64,6 +87,7 @@ onMounted(() => {
         </template>
 
         <ol-mouseposition-control v-if="isDev" id="mouse" />
+        <ol-context-menu :items="contextMenuItems" v-if="isDev" />
         <slot></slot>
     </ol-map>
 </template>
@@ -77,5 +101,9 @@ ol-map {
 .marker svg {
     height: 2rem;
     color: red;
+}
+
+#mouse {
+    background-color: white;
 }
 </style>

@@ -304,7 +304,7 @@ const initMap = () => {
 const initMarkers = () => {
     for (let campus in markers) {
         for (let marker of markers[campus]) {
-            switch (marker.type) {
+            switch (parseInt(marker.type)) {
                 case 2: marker.color = "red"; break;
                 case 3: marker.color = "yellow"; break;
                 case 4: marker.color = "blue"; break;
