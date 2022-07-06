@@ -63,7 +63,7 @@ onMounted(() => {
             </Marker>
         </template>
 
-        <ol-mouseposition-control v-if="isDev" />
+        <ol-mouseposition-control v-if="isDev" id="mouse" />
         <slot></slot>
     </ol-map>
 </template>

@@ -148,16 +148,8 @@ let typeStorage = ref('1') // 当前激活的建筑类型编号，会从cookies�
 let selectedCampus = ref('中心校区') // 当前激活的校区
 let selectedType = ref('全部') // 当前激活的建筑类型
 let showCampusSelection = ref(true) // 是否显示校区选择按钮（在click搜索框后将隐藏）
-let buildingTypes = reactive([ // 建筑列表，【注意！】以下数据是随意填入，之后可从json读入数据
-    { id: '1', active: false, name: '知新楼' }, // id: 建筑编号 active: 是否被选中，默认未被选中 name: 建筑名称
-    { id: '2', active: false, name: '理综楼' },
-    { id: '3', active: false, name: '董明珠楼' },
-    { id: '4', active: false, name: '电教北楼' },
-    { id: '5', active: false, name: '公教楼' },
-    { id: '6', active: false, name: '明德楼' },
-    { id: '7', active: false, name: '数学楼' },
-    { id: '8', active: false, name: '文史楼' }
-])
+let currentActiveBuildingId = ref("-")
+let buildingList = ref() // 建筑列表，【注意！】以下数据是随意填入，之后可从json读入数据
 let showBuildingSelectionBoard = ref(false) //是否展示建筑选择弹窗，false为不展示
 let showInformation = ref(false) // 是否展示详情弹窗，false为不展示
 let active = ref(false) // 当任意弹窗被激活后，此属性被激活，此时可以click页面的任意位置关闭弹窗
@@ -228,6 +220,7 @@ const optionalCampus = () => { // 初始化校区，【注意】更改地图的�
         case '8': selectedCampus.value = '威海校区'; campus[7].status = false; break
         default: selectedCampus.value = '中心校区'; campus[0].status = false;
     }
+    updateMarkers();
 }
 
 const optionalType = () => { // 初始化建筑类型
@@ -272,12 +265,7 @@ const search = () => { // 搜索框click
 }
 
 const selectOneBuilding = (e) => { // 选择了一个建筑
-    // console.log(e)
-    for (let i = 0; i < buildingTypes.length; i++) {
-        buildingTypes[i].active = false
-    }
-    let id = parseInt(e.target.dataset.id) - 1
-    buildingTypes[id].active = true
+    currentActiveBuildingId.value = e.target.dataset.id
 }
 
 const cancel = () => { // 点击了取消按钮
@@ -323,7 +311,7 @@ const initMarkers = () => {
                 case 5: marker.color = "green"; break;
                 case 6: marker.color = "brown"; break;
             }
-            marker.hidden = typeStorage.value != "1" && typeStorage.value != marker.type.toString;
+            marker.hidden = typeStorage.value !== "1" && typeStorage.value !== marker.type.toString();
         }
     }
 }
@@ -331,8 +319,11 @@ const initMarkers = () => {
 // 更新标记显示状态
 const updateMarkers = (id) => {
     for (let marker of campus[parseInt(campusStorage.value) - 1].map.markers) {
-        marker.hidden = typeStorage.value != "1" && typeStorage.value != marker.type.toString;
+        marker.hidden = typeStorage.value !== "1" && typeStorage.value !== marker.type.toString();
     }
+    buildingList.value = campus[parseInt(campusStorage.value) - 1].map.markers.filter((marker) => {
+        return !marker.hidden;
+    })
 }
 
 //生命周期钩子
@@ -393,8 +384,9 @@ onMounted(() => {
                     <div class="button" id="confirm" @click="confirm">确定</div>
                 </div>
                 <div id="buildingGroup">
-                    <div class="building" v-for="item in buildingTypes" :key="item.id"
-                        :class="{ buildingActive: item.active }" @click="selectOneBuilding" :data-id="item.id">
+                    <div class="building" v-for="item in buildingList" :key="item.id"
+                        :class="{ buildingActive: item.id === currentActiveBuildingId }" @click="selectOneBuilding"
+                        :data-id="item.id">
                         {{ item.name }}</div>
                 </div>
             </div>
@@ -515,7 +507,7 @@ onMounted(() => {
     display: block;
     width: 95%;
     position: fixed;
-    top: 3.5rem;
+    top: 7rem;
     left: 50%;
     transform: translateX(-50%);
     background-color: white;
