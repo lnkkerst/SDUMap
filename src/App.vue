@@ -824,7 +824,7 @@ onMounted(() => {
     border-left: #D3C3A8 4px solid;
     padding-left: 1rem;
     margin-left: 2rem;
-    margin-top: 5vw;
+    margin-top: 2vh;
     font-weight: bold;
 }
 
