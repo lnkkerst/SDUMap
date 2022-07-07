@@ -13,7 +13,8 @@ const props = defineProps([
     "imgUrl",
     "size",
     "zoom",
-    "markers"
+    "markers",
+    "center"
 ]);
 
 const emit = defineEmits([
@@ -26,7 +27,7 @@ const size = computed(() => {
     return props.size ? props.size : [1920, 1080];
 })
 const center = computed(() => {
-    return [size.value[0] / 2, size.value[1] / 2];
+    return props.center ? props.center : [size.value[0] / 2, size.value[1] / 2];
 })
 const extent = computed(() => {
     return [0, 0, ...size.value]
@@ -38,7 +39,7 @@ const projection = reactive({
 const isDev = import.meta.env.DEV;
 
 const onClick = (marker) => {
-    view.value.setCenter(marker.position);
+    // view.value.setCenter(marker.position);
     emit("markerClick", marker.id);
 }
 

@@ -3,6 +3,7 @@ import {
     ref,
     reactive,
     onMounted,
+    computed,
     getCurrentInstance
 } from "vue";
 
@@ -19,10 +20,14 @@ import QfsMapImg from "./assets/img/maps/qianfoshan.jpg";
 
 import markersRaw from "./assets/json/markers.json";
 
+import informationList from "./assets/json/information.json";
+
 let internalInstance = getCurrentInstance();
 let cookies = internalInstance.appContext.config.globalProperties.$cookies
 
 const markers = reactive(markersRaw);
+const information = reactive(informationList);
+
 //data
 const campus = reactive([ // 校区列表
     {
@@ -153,6 +158,21 @@ let buildingList = ref() // 建筑列表，【注意！】以下数据是随意�
 let showBuildingSelectionBoard = ref(false) //是否展示建筑选择弹窗，false为不展示
 let showInformation = ref(false) // 是否展示详情弹窗，false为不展示
 let active = ref(false) // 当任意弹窗被激活后，此属性被激活，此时可以click页面的任意位置关闭弹窗
+let info = ref();
+const mapCenter = ref(null);
+
+const infoDisplayType = computed(() => {
+    let res = "";
+    switch (info.value.type) {
+        case '2': res = '教学楼'; break
+        case '3': res = '实验楼'; break
+        case '4': res = '宿舍楼'; break
+        case '5': res = '功能区'; break
+        case '6': res = '景观'; break
+        default: res = " 未知"; break
+    }
+    return res;
+})
 
 //methods
 const changeCampus = () => { // 显示或隐藏校区选择弹窗
@@ -186,7 +206,6 @@ const setCampus = (e) => { // 选择了某个校区执行的操作
     showCampus.value = false
     activeClassForCampus.value = false
     optionalCampus() // 按照选择初始化校区
-    console.log(campusStorage.value);
 }
 
 const setType = (e) => { // 选择了某个建筑类型后执行的操作
@@ -196,7 +215,6 @@ const setType = (e) => { // 选择了某个建筑类型后执行的操作
     showType.value = false
     activeClassForType.value = false
     optionalType() // 按照选择初始化建筑类型
-    console.log(typeStorage.value);
 }
 
 const optionalCampus = () => { // 初始化校区，【注意】更改地图的代码可以在此
@@ -233,7 +251,6 @@ const optionalType = () => { // 初始化建筑类型
     } else {
         typeStorage.value = typeStorageFromCookies
     }
-    console.log(typeof (typeStorage.value));
     switch (typeStorage.value) {
         case '1': selectedType.value = '全部'; types[0].status = false; break
         case '2': selectedType.value = '教学楼'; types[1].status = false; break
@@ -243,7 +260,7 @@ const optionalType = () => { // 初始化建筑类型
         case '6': selectedType.value = '景观'; types[5].status = false; break
         default: selectedType.value = '全部'; types[6].status = false;
     }
-    updateMarkers(parseInt(typeStorage.value));
+    updateMarkers();
 }
 
 const search = () => { // 搜索框click
@@ -273,7 +290,13 @@ const cancel = () => { // 点击了取消按钮
 }
 
 const confirm = () => { // 点击了确认按钮
-    search()
+    search();
+    for (var i = 0; i < buildingList.value.length; i++) {
+        if (buildingList.value[i].id === currentActiveBuildingId.value) {
+            mapCenter.value = buildingList.value[i].position;
+            break;
+        }
+    }
 }
 
 const deActive = () => { // 点击了页面的任意位置，关闭弹窗，回到初始状态
@@ -288,12 +311,6 @@ const deActive = () => { // 点击了页面的任意位置，关闭弹窗，回�
     let changeWidth = document.getElementById('searchBox')
     changeWidth.style.left = 40 + 'vw'
     changeWidth.style.width = 55 + 'vw'
-}
-
-//临时加入的方法，目的是为了测试一级弹窗，后续请修改或删除此方法，并使用地图click的方式访问一级弹窗
-const showInformationMethod = () => {
-    active.value = !active.value
-    showInformation.value = !showInformation.value
 }
 
 // 初始化地图
@@ -324,6 +341,20 @@ const updateMarkers = (id) => {
     buildingList.value = campus[parseInt(campusStorage.value) - 1].map.markers.filter((marker) => {
         return !marker.hidden;
     })
+}
+
+// 点击了标记
+const markerClicked = (id) => {
+    info.value = information[id];
+    if (!info.value.type) {
+        for (let x of buildingList.value) {
+            if (x.id === id) {
+                info.value.type = x.type;
+            }
+        }
+    }
+    active.value = !active.value
+    showInformation.value = true
 }
 
 //生命周期钩子
@@ -395,16 +426,16 @@ onMounted(() => {
         <transition name="board-in-out">
             <div id="information" v-if="showInformation">
                 <div id="buildingName">
-                    <div id="chineseName">知新楼</div>
-                    <div id="englishName">ZhiXin Building</div>
+                    <div id="chineseName">{{ info.ChineseName }}</div>
+                    <div id="englishName">{{ info.EnglishName }}</div>
                 </div>
                 <div id="clock" class="function">
                     <img src="./assets/img/ui/clock.png">
-                    <div>6:00 ~ 22:30</div>
+                    <div>{{ info.time }}</div>
                 </div>
                 <div id="position" class="function">
                     <img src="./assets/img/ui/location.png">
-                    <div>教学楼</div>
+                    <div>{{ infoDisplayType }}</div>
                 </div>
             </div>
         </transition>
@@ -412,13 +443,12 @@ onMounted(() => {
         <div :class="{ blur: active }" id="map">
             <template v-for="i of campus">
                 <Transition name="board-in-out">
-                    <single-map class="map" v-if="!i.status" :size="i.map.size" :img-url="i.map.imgUrl" :zoom="3"
-                        :markers="i.map.markers"></single-map>
+                    <single-map :center="mapCenter" class="map" v-if="!i.status" :size="i.map.size"
+                        :img-url="i.map.imgUrl" :zoom="3" :markers="i.map.markers" @marker-click="markerClicked">
+                    </single-map>
                 </Transition>
             </template>
         </div>
-        <!-- 临时按钮，用于展示一级弹窗，后续请直接删除 -->
-        <button @click="showInformationMethod">showInformation</button>
     </div>
 </template>
 
@@ -643,12 +673,12 @@ onMounted(() => {
     position: relative;
     left: 42%;
     top: 50%;
-    transform: translateY(-56.5%);
+    transform: translateY(-50%);
     transition-duration: 1s;
 }
 
 .selectBuildingType {
-    width: 30%;
+    width: 33%;
     height: 100%;
     text-align: center;
     line-height: 1.8rem;
@@ -664,7 +694,7 @@ onMounted(() => {
 }
 
 .selectBuildingTypeActive {
-    width: 30%;
+    width: 33%;
     height: 100%;
     text-align: center;
     line-height: 1.8rem;
@@ -784,6 +814,7 @@ onMounted(() => {
     transform: translateX(-50%);
     border-radius: 20px;
     bottom: 2vh;
+    z-index: 1500;
 }
 
 #buildingName {
