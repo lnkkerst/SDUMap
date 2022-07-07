@@ -807,7 +807,7 @@ onMounted(() => {
 
 #information {
     width: 90vw;
-    height: 20vh;
+    /* height: 20vh; */
     background-color: #eee;
     position: fixed;
     left: 50%;
@@ -815,6 +815,8 @@ onMounted(() => {
     border-radius: 20px;
     bottom: 2vh;
     z-index: 1500;
+    padding-bottom: 2vh;
+    padding-right: 2vh;
 }
 
 #buildingName {
