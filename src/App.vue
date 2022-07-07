@@ -313,12 +313,6 @@ const deActive = () => { // 点击了页面的任意位置，关闭弹窗，回�
     changeWidth.style.width = 55 + 'vw'
 }
 
-//临时加入的方法，目的是为了测试一级弹窗，后续请修改或删除此方法，并使用地图click的方式访问一级弹窗
-const showInformationMethod = () => {
-    active.value = !active.value
-    showInformation.value = !showInformation.value
-}
-
 // 初始化地图
 const initMap = () => {
 }
@@ -455,8 +449,6 @@ onMounted(() => {
                 </Transition>
             </template>
         </div>
-        <!-- 临时按钮，用于展示一级弹窗，后续请直接删除 -->
-        <button @click="showInformationMethod">showInformation</button>
     </div>
 </template>
 
