@@ -62,8 +62,9 @@ onMounted(() => {
     cursor: pointer;
     font-size: 0.8rem;
     display: inline;
-    color: #585b70;
+    color: #eff1f5;
     font-family: sans-serif;
     font-weight: bold;
+    text-shadow: 1px 1px 1px black;
 }
 </style>

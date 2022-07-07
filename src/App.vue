@@ -322,11 +322,11 @@ const initMarkers = () => {
     for (let campus in markers) {
         for (let marker of markers[campus]) {
             switch (parseInt(marker.type)) {
-                case 2: marker.color = "red"; break;
-                case 3: marker.color = "yellow"; break;
-                case 4: marker.color = "blue"; break;
-                case 5: marker.color = "green"; break;
-                case 6: marker.color = "brown"; break;
+                case 2: marker.color = "#B4E08D"; break;
+                case 3: marker.color = "#71C286"; break;
+                case 4: marker.color = "#5553A6"; break;
+                case 5: marker.color = "#FFA3CD"; break;
+                case 6: marker.color = "#FFEA9E"; break;
             }
             marker.hidden = typeStorage.value !== "1" && typeStorage.value !== marker.type.toString();
         }
