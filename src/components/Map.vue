@@ -72,21 +72,19 @@ onMounted(() => {
 <template>
     <ol-map :loadTilesWhileAnimating="true" :loadTilesWhileInteracting="true">
         <ol-view ref="view" :center="center" :rotation="rotation" :zoom="zoom" :projection="projection" />
-
-        <!-- <ol-zoom-control id="zoom" /> -->
-
         <ol-image-layer>
             <ol-source-image-static :url="props.imgUrl" :imageSize="size" :imageExtent="extent"
                 :projection="projection">
             </ol-source-image-static>
         </ol-image-layer>
+
         <template v-for="marker in markers">
-            <Marker v-if="!marker.hidden" :color="marker.color" :size="24" :position="marker.position"
+            <Marker v-if="!marker.hidden" :color="marker.color" :size="24" :position="marker.position" :name="marker.name"
                 @click.prevent="onClick(marker)">
             </Marker>
         </template>
 
-        <ol-mouseposition-control v-if="isDev" id="mouse" />
+        <ol-mouseposition-control v-if="isDev" class="mouse" />
         <ol-context-menu :items="contextMenuItems" v-if="isDev" />
         <slot></slot>
     </ol-map>
@@ -103,7 +101,7 @@ ol-map {
     color: red;
 }
 
-#mouse {
+.mouse {
     background-color: white;
 }
 </style>
