@@ -163,7 +163,7 @@ const mapCenter = ref(null);
 
 const infoDisplayType = computed(() => {
     let res = "";
-    switch (info.type) {
+    switch (info.value.type) {
         case '2': res = '教学楼'; break
         case '3': res = '实验楼'; break
         case '4': res = '宿舍楼'; break
@@ -260,7 +260,7 @@ const optionalType = () => { // 初始化建筑类型
         case '6': selectedType.value = '景观'; types[5].status = false; break
         default: selectedType.value = '全部'; types[6].status = false;
     }
-    updateMarkers(parseInt(typeStorage.value));
+    updateMarkers();
 }
 
 const search = () => { // 搜索框click
@@ -352,6 +352,13 @@ const updateMarkers = (id) => {
 // 点击了标记
 const markerClicked = (id) => {
     info.value = information[id];
+    if (!info.value.type) {
+        for (let x of buildingList.value) {
+            if (x.id === id) {
+                info.value.type = x.type;
+            }
+        }
+    }
     active.value = !active.value
     showInformation.value = true
 }
