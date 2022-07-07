@@ -538,7 +538,7 @@ onMounted(() => {
     display: block;
     width: 95%;
     position: fixed;
-    top: 5rem;
+    top: 3.5rem;
     left: 50%;
     transform: translateX(-50%);
     background-color: white;
@@ -695,7 +695,7 @@ onMounted(() => {
 }
 
 .selectBuildingTypeActive {
-    width: 30%;
+    width: 33%;
     height: 100%;
     text-align: center;
     line-height: 1.8rem;
