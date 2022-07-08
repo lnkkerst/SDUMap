@@ -3,7 +3,14 @@ import { ref, reactive, onMounted, defineEmits, computed } from "vue";
 
 import Marker from "../components/Marker.vue";
 
-const props = defineProps(["imgUrl", "size", "zoom", "markers", "center"]);
+const props = defineProps([
+    "imgUrl",
+    "size",
+    "zoom",
+    "markers",
+    "center",
+    "showName",
+]);
 
 const emit = defineEmits(["markerClick"]);
 
@@ -21,6 +28,10 @@ const extent = computed(() => {
 const projection = reactive({
     units: "pixels",
     extent: extent,
+});
+
+const showName = computed(() => {
+    return props.showName !== undefined ? props.showName : true;
 });
 
 const onClick = (marker) => {
@@ -80,6 +91,7 @@ onMounted(() => {});
                 :size="24"
                 :position="marker.position"
                 :name="marker.name"
+                :show-name="showName"
                 @click.prevent="onClick(marker)"
             >
             </Marker>

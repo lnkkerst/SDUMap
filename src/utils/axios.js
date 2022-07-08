@@ -1,5 +1,5 @@
 import axiosRoot from "axios";
-import {useAlert} from "balm-ui";
+import { useAlert } from "balm-ui";
 
 const $alert = useAlert();
 
@@ -19,14 +19,19 @@ axios.interceptors.request.use(
         return Promise.reject(error);
     }
 );
-axios.interceptors.response.use(function(res) { return res }, function(err) {
-    if (err.response.status === 401) {
-        localStorage.clear();
-        $alert("token 失效，请重新输入").then(()=>{
-            location.reload();
-        })
-    };
-    return Promise.reject(err);
-});
+axios.interceptors.response.use(
+    function (res) {
+        return res;
+    },
+    function (err) {
+        if (err.response.status === 401) {
+            localStorage.clear();
+            $alert("token 失效，请重新输入").then(() => {
+                location.reload();
+            });
+        }
+        return Promise.reject(err);
+    }
+);
 
 export default axios;
