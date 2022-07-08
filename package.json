@@ -8,15 +8,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^0.27.2",
+    "balm-ui": "9",
     "minireset.css": "^0.0.7",
     "pinia": "^2.0.14",
-    "vue": "^3.2.25",
-    "vue-router": "4",
-    "vue3-openlayers": "^0.1.68",
-    "vue-cookies": "^1.8.1"
+    "vue": "3.2.30",
+    "vue-cookies": "^1.8.1",
+    "vue-router": "^4.1.1",
+    "vue3-openlayers": "^0.1.68"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
-    "vite": "^2.9.9"
+    "vite": "^2.9.13"
   }
 }
