@@ -1,9 +1,5 @@
 <script setup>
-import {
-    ref,
-    onMounted,
-    reactive
-} from "vue";
+import { ref, onMounted, reactive } from "vue";
 import Map from "../../components/Map.vue";
 import XlsImg from "../../assets/img/maps/xinglongshan.jpg";
 import markersRaw from "../../assets/json/markers/xinglongshan.json";
@@ -15,12 +11,17 @@ onMounted(() => {
         marker.hidden = false;
         marker.color = "#329cc";
     }
-})
-
+});
 </script>
 
 <template>
-    <Map id="map" :imgUrl="XlsImg" :zoom="2" :size="[3582, 3507]" :markers="markers"></Map>
+    <Map
+        id="map"
+        :imgUrl="XlsImg"
+        :zoom="2"
+        :size="[3582, 3507]"
+        :markers="markers"
+    ></Map>
 </template>
 
 <style scoped>
