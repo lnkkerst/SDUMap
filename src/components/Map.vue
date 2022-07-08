@@ -27,6 +27,28 @@ const onClick = (marker) => {
     emit("markerClick", marker.id);
 };
 
+const colorConvertor = (type) => {
+    let res = "#3299cc";
+    switch (parseInt(type)) {
+        case 2:
+            res = "#B4E08D";
+            break;
+        case 3:
+            res = "#71C286";
+            break;
+        case 4:
+            res = "#5553A6";
+            break;
+        case 5:
+            res = "#FFA3CD";
+            break;
+        case 6:
+            res = "#FFEA9E";
+            break;
+    }
+    return res;
+};
+
 onMounted(() => {});
 </script>
 
@@ -52,7 +74,9 @@ onMounted(() => {});
         <template v-for="marker in markers">
             <Marker
                 v-if="!marker.hidden"
-                :color="marker.color"
+                :color="
+                    marker.color ? marker.color : colorConvertor(marker.type)
+                "
                 :size="24"
                 :position="marker.position"
                 :name="marker.name"

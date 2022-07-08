@@ -387,7 +387,7 @@ const deActive = () => {
 };
 
 // 初始化地图
-const initMap = () => { };
+const initMap = () => {};
 
 // 初始化标记
 const initMarkers = () => {
@@ -421,7 +421,8 @@ const initMarkers = () => {
 const updateMarkers = (id) => {
     for (let marker of campus[parseInt(campusStorage.value) - 1].map.markers) {
         marker.hidden =
-            typeStorage.value !== "1" && typeStorage.value !== marker.type.toString();
+            typeStorage.value !== "1" &&
+            typeStorage.value !== marker.type.toString();
     }
     buildingList.value = campus[
         parseInt(campusStorage.value) - 1
@@ -465,33 +466,64 @@ onMounted(() => {
 
         <div id="bar">
             <transition name="slide-in-out">
-                <div class="selectCampus" :class="{ selectCampusActive: activeClassForCampus }"
-                    v-if="showCampusSelection">
+                <div
+                    class="selectCampus"
+                    :class="{ selectCampusActive: activeClassForCampus }"
+                    v-if="showCampusSelection"
+                >
                     <div @click="changeCampus">{{ selectedCampus }}</div>
                 </div>
             </transition>
             <transition name="slide-fade">
-                <div id="selectCampusPanel" class="panel" v-show="showCampus" key="box">
-                    <div v-for="item in campus" :key="item.id" :id="'campus' + item.id" @click="setCampus"
-                        :data-id="item.id" class="selectCampusPanelDiv"
-                        :class="{ selectCampusPanelDivActive: item.status }">
+                <div
+                    id="selectCampusPanel"
+                    class="panel"
+                    v-show="showCampus"
+                    key="box"
+                >
+                    <div
+                        v-for="item in campus"
+                        :key="item.id"
+                        :id="'campus' + item.id"
+                        @click="setCampus"
+                        :data-id="item.id"
+                        class="selectCampusPanelDiv"
+                        :class="{ selectCampusPanelDivActive: item.status }"
+                    >
                         {{ item.campus }}
                     </div>
                 </div>
             </transition>
 
             <transition name="slide-fade">
-                <div id="selectBuildingTypePanel" class="panel" v-show="showType" key="box">
-                    <div v-for="item in types" :key="item.id" :id="'type' + item.id" @click="setType" :data-id="item.id"
-                        class="selectBuildingTypePanelDiv" :class="{ selectBuildingTypePanelDivActive: item.status }">
+                <div
+                    id="selectBuildingTypePanel"
+                    class="panel"
+                    v-show="showType"
+                    key="box"
+                >
+                    <div
+                        v-for="item in types"
+                        :key="item.id"
+                        :id="'type' + item.id"
+                        @click="setType"
+                        :data-id="item.id"
+                        class="selectBuildingTypePanelDiv"
+                        :class="{
+                            selectBuildingTypePanelDivActive: item.status,
+                        }"
+                    >
                         {{ item.type }}
                     </div>
                 </div>
             </transition>
 
             <div id="searchBox">
-                <div class="selectBuildingType" @click="changeType"
-                    :class="{ selectBuildingTypeActive: activeClassForType }">
+                <div
+                    class="selectBuildingType"
+                    @click="changeType"
+                    :class="{ selectBuildingTypeActive: activeClassForType }"
+                >
                     {{ selectedType }}
                 </div>
                 <div id="search" @click="search">
@@ -506,9 +538,16 @@ onMounted(() => {
                     <div class="button" id="confirm" @click="confirm">确定</div>
                 </div>
                 <div id="buildingGroup">
-                    <div class="building" v-for="item in buildingList" :key="item.id"
-                        :class="{ buildingActive: item.id === currentActiveBuildingId }" @click="selectOneBuilding"
-                        :data-id="item.id">
+                    <div
+                        class="building"
+                        v-for="item in buildingList"
+                        :key="item.id"
+                        :class="{
+                            buildingActive: item.id === currentActiveBuildingId,
+                        }"
+                        @click="selectOneBuilding"
+                        :data-id="item.id"
+                    >
                         {{ item.name }}
                     </div>
                 </div>
@@ -535,8 +574,16 @@ onMounted(() => {
         <div :class="{ blur: active }" id="map">
             <template v-for="i of campus">
                 <Transition name="board-in-out">
-                    <single-map :center="mapCenter" class="map" v-if="!i.status" :size="i.map.size"
-                        :img-url="i.map.imgUrl" :zoom="3" :markers="i.map.markers" @marker-click="markerClicked">
+                    <single-map
+                        :center="mapCenter"
+                        class="map"
+                        v-if="!i.status"
+                        :size="i.map.size"
+                        :img-url="i.map.imgUrl"
+                        :zoom="3"
+                        :markers="i.map.markers"
+                        @marker-click="markerClicked"
+                    >
                     </single-map>
                 </Transition>
             </template>

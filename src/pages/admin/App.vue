@@ -23,6 +23,9 @@ const uiState = reactive({
                         "sdumap_admin_token",
                         uiState.dialog.changeToken.token
                     );
+                    setTimeout(() => {
+                        location.reload();
+                    }, 200);
                 } else {
                     setTimeout(() => {
                         uiState.dialog.changeToken.open = true;
@@ -30,9 +33,10 @@ const uiState = reactive({
                 }
             },
         },
-        addMarker: {
+        modifyMarker: {
             open: false,
             loading: false,
+            withDeleteAction: false,
             marker: {
                 name: "",
                 englishName: "",
@@ -44,6 +48,7 @@ const uiState = reactive({
                 position: [0, 0],
                 extraInfo: "{}",
             },
+            markerId: "",
             typeOptions: [
                 { label: "教学楼", value: 2 },
                 { label: "实验楼", value: 3 },
@@ -51,25 +56,49 @@ const uiState = reactive({
                 { label: "功能区", value: 5 },
                 { label: " 景观", value: 6 },
             ],
-            onSubmit: async() => {
+            onAdd: async () => {
                 for (let x of ["name", "englishName", "openTime"]) {
-                    if (uiState.dialog.addMarker.marker[x].length === 0) {
+                    if (uiState.dialog.modifyMarker.marker[x].length === 0) {
                         $alert("请完整填写信息！");
                         return;
                     }
                 }
-                const submitMarker = {...uiState.dialog.addMarker.marker};
+                uiState.dialog.modifyMarker.loading = true;
+                const submitMarker = { ...uiState.dialog.modifyMarker.marker };
                 submitMarker.position = JSON.stringify(submitMarker.position);
                 try {
-                    const res = await axios.put("/marker", submitMarker);
-                    uiState.dialog.addMarker.open = false;
-                    updateMarkers();
+                    if (!uiState.dialog.modifyMarker.withDeleteAction) {
+                        const res = await axios.put("/marker", submitMarker);
+                    } else {
+                        const res = await axios.post("/marker", {
+                            id: uiState.dialog.modifyMarker.markerId,
+                            data: submitMarker,
+                        });
+                    }
+                    uiState.dialog.modifyMarker.open = false;
+                    await updateMarkers();
                 } catch (_e) {
-                    $alert(`Error code : ${_e.message}`)
+                    $alert(`Error : ${_e.message}`);
+                }
+            },
+            onDelete: async () => {
+                uiState.dialog.modifyMarker.loading = true;
+                try {
+                    const res = await axios.delete("/marker", {
+                        data: { id: uiState.dialog.modifyMarker.markerId },
+                    });
+                    uiState.dialog.modifyMarker.open = false;
+                    await updateMarkers();
+                } catch (_e) {
+                    $alert(`Error : ${_e.message}`);
                 }
             },
             onCancel: () => {
-                uiState.dialog.addMarker.open = false;
+                uiState.dialog.modifyMarker.open = false;
+            },
+            onClose: () => {
+                uiState.dialog.modifyMarker.withDeleteAction = false;
+                uiState.dialog.modifyMarker.loading = false;
             },
         },
     },
@@ -89,8 +118,8 @@ const contextMenuItems = reactive([
     {
         text: "添加标记",
         callback: (val) => {
-            uiState.dialog.addMarker.marker.position = val.coordinate;
-            uiState.dialog.addMarker.open = true;
+            uiState.dialog.modifyMarker.marker.position = val.coordinate;
+            uiState.dialog.modifyMarker.open = true;
         },
     },
     "-",
@@ -116,11 +145,29 @@ watch(
     }
 );
 
+const onClickMarker = (id) => {
+    uiState.dialog.modifyMarker.markerId = id;
+    for (let x of mapState.markers) {
+        if (x.id === id) {
+            uiState.dialog.modifyMarker.marker.name = x.name;
+            uiState.dialog.modifyMarker.marker.englishName = x.englishName;
+            uiState.dialog.modifyMarker.marker.extraInfo = x.extraInfo;
+            uiState.dialog.modifyMarker.marker.openTime = x.extraInfo;
+            uiState.dialog.modifyMarker.marker.type = x.type;
+            uiState.dialog.modifyMarker.withDeleteAction = true;
+            uiState.dialog.modifyMarker.open = true;
+            return;
+        }
+    }
+    console.log("notfound");
+};
+
 onMounted(async () => {
     if (localStorage.getItem("sdumap_admin_token") === null) {
         uiState.dialog.changeToken.open = true;
+    } else {
+        await updateMarkers();
     }
-    await updateMarkers();
 });
 </script>
 
@@ -165,11 +212,12 @@ onMounted(async () => {
     </ui-dialog>
 
     <ui-dialog
-        v-model="uiState.dialog.addMarker.open"
-        @confirm="uiState.dialog.addMarker.onConfirm"
+        v-model="uiState.dialog.modifyMarker.open"
+        @confirm="uiState.dialog.modifyMarker.onConfirm"
         scrollable
+        @close="uiState.dialog.modifyMarker.onClose"
     >
-        <ui-dialog-title>添加</ui-dialog-title>
+        <ui-dialog-title>标记</ui-dialog-title>
         <ui-dialog-content>
             <ui-form type="|" item-margin-bottom="16" action-align="center">
                 <template #default="{ subitemClass, actionClass }">
@@ -177,7 +225,7 @@ onMounted(async () => {
                         <label>名称</label>
                         <ui-textfield
                             fullwidth
-                            v-model="uiState.dialog.addMarker.marker.name"
+                            v-model="uiState.dialog.modifyMarker.marker.name"
                         ></ui-textfield>
                     </ui-form-field>
                     <ui-form-field class="required">
@@ -185,14 +233,14 @@ onMounted(async () => {
                         <ui-textfield
                             fullwidth
                             v-model="
-                                uiState.dialog.addMarker.marker.englishName
+                                uiState.dialog.modifyMarker.marker.englishName
                             "
                         ></ui-textfield>
                     </ui-form-field>
                     <ui-form-field class="required">
                         <label>坐标</label>
                         <ui-textfield fullwidth disabled>{{
-                            uiState.dialog.addMarker.marker.position.map(
+                            uiState.dialog.modifyMarker.marker.position.map(
                                 (x) => {
                                     return parseInt(x);
                                 }
@@ -203,15 +251,17 @@ onMounted(async () => {
                         <label>类型</label>
                         <ui-select
                             fullwidth
-                            :options="uiState.dialog.addMarker.typeOptions"
-                            v-model="uiState.dialog.addMarker.marker.type"
+                            :options="uiState.dialog.modifyMarker.typeOptions"
+                            v-model="uiState.dialog.modifyMarker.marker.type"
                         ></ui-select>
                     </ui-form-field>
                     <ui-form-field class="required">
                         <label>开放时间</label>
                         <ui-textfield
                             fullwidth
-                            v-model="uiState.dialog.addMarker.marker.openTime"
+                            v-model="
+                                uiState.dialog.modifyMarker.marker.openTime
+                            "
                         ></ui-textfield>
                     </ui-form-field>
                     <ui-form-field>
@@ -220,21 +270,40 @@ onMounted(async () => {
                             fullwidth
                             input-type="textarea"
                             rows="5"
-                            v-model="uiState.dialog.addMarker.marker.extraInfo"
+                            v-model="
+                                uiState.dialog.modifyMarker.marker.extraInfo
+                            "
                         ></ui-textfield>
                     </ui-form-field>
-                    <ui-form-field :class="actionClass">
+                    <ui-form-field
+                        :class="actionClass"
+                        v-show="!uiState.dialog.modifyMarker.loading"
+                    >
                         <ui-button
                             raised
-                            @click.prevent="uiState.dialog.addMarker.onSubmit"
+                            @click.prevent="uiState.dialog.modifyMarker.onAdd"
                             >提交</ui-button
                         >
                         <ui-button
                             outlined
-                            @click.prevent="uiState.dialog.addMarker.onCancel"
+                            @click.prevent="
+                                uiState.dialog.modifyMarker.onCancel
+                            "
                             >取消</ui-button
                         >
+                        <ui-button
+                            raised
+                            @click.prevent="
+                                uiState.dialog.modifyMarker.onDelete
+                            "
+                            v-if="uiState.dialog.modifyMarker.withDeleteAction"
+                            >删除此标记</ui-button
+                        >
                     </ui-form-field>
+                    <ui-progress
+                        active
+                        v-show="uiState.dialog.modifyMarker.loading"
+                    ></ui-progress>
                 </template>
             </ui-form>
         </ui-dialog-content>
@@ -246,6 +315,7 @@ onMounted(async () => {
         :zoom="4"
         :size="mapState.size"
         :markers="mapState.markers"
+        @marker-click="onClickMarker"
     >
         <ol-context-menu :items="contextMenuItems" />
     </single-map>
