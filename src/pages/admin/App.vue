@@ -51,6 +51,7 @@ const uiState = reactive({
                 }),
                 position: [0, 0],
                 extraInfo: "{}",
+                tips: undefined,
             },
             markerId: "",
             typeOptions: [
@@ -143,6 +144,7 @@ const mapState = reactive({
     diffMarkers: [],
     showName: true,
     onlyDiff: false,
+    loading: true,
 });
 
 const contextMenuItems = reactive([
@@ -190,16 +192,40 @@ const updateMarkers = async () => {
                 color: "red",
                 ...bo.get(x),
             });
-        } else if (
-            bo.get(x).name !== bn.get(bo.get(x).id).name ||
-            bo.get(x).englishName !== bn.get(bo.get(x).id).englishName ||
-            bo.get(x).extraInfo !== bn.get(bo.get(x).id).extraInfo ||
-            bo.get(x).openTime !== bn.get(bo.get(x).id).openTime
-        ) {
-            diffMarkers.push({
-                color: "yellow",
-                ...bn.get(x),
-            });
+        } else {
+            let mo = bo.get(x),
+                mn = bn.get(x);
+            if (
+                mo.name != mn.name ||
+                mo.englishName != mn.englishName ||
+                mo.extraInfo != mn.extraInfo ||
+                mo.openTime != mn.openTime
+            ) {
+                let diff = "修改了什么呢？\n";
+                if (mo.name !== mn.name) {
+                    diff = diff.concat(`名称: ${mo.name} => ${mn.name}\n`);
+                }
+                if (mo.englishName !== mn.englishName) {
+                    diff = diff.concat(
+                        `英文名称: ${mo.englishName} => ${mn.englishName}\n`
+                    );
+                }
+                if (mo.openTime !== mn.openTime) {
+                    diff = diff.concat(
+                        `开放时间: ${mo.openTime} => ${mn.openTime}\n`
+                    );
+                }
+                if (mo.extraInfo !== mn.extraInfo) {
+                    diff = diff.concat(
+                        `附加信息: ${mo.extraInfo} => ${mn.extraInfo}\n`
+                    );
+                }
+                diffMarkers.push({
+                    color: "yellow",
+                    ...bn.get(x),
+                    tips: diff,
+                });
+            }
         }
     }
     mapState.diffMarkers = diffMarkers;
@@ -207,8 +233,10 @@ const updateMarkers = async () => {
 
 watch(
     () => mapState.currentMapId,
-    (newVal) => {
-        updateMarkers();
+    async (newVal) => {
+        mapState.loading = true;
+        await updateMarkers();
+        mapState.loading = false;
     }
 );
 
@@ -234,6 +262,7 @@ const onClickMarker = (id) => {
             uiState.dialog.modifyMarker.marker.openTime = x.openTime;
             uiState.dialog.modifyMarker.marker.type = x.type;
             uiState.dialog.modifyMarker.marker.position = x.position;
+            uiState.dialog.modifyMarker.marker.tips = x.tips;
             uiState.dialog.modifyMarker.withDeleteAction = true;
             uiState.dialog.modifyMarker.open = true;
             return;
@@ -246,6 +275,7 @@ onMounted(async () => {
         uiState.dialog.changeToken.open = true;
     } else {
         await updateMarkers();
+        mapState.loading = false;
     }
 });
 </script>
@@ -418,6 +448,18 @@ onMounted(async () => {
                         ></ui-textfield>
                     </ui-form-field>
                     <ui-form-field
+                        v-show="uiState.dialog.modifyMarker.marker.tips"
+                    >
+                        <label>其它</label>
+                        <ui-textfield
+                            fullwidth
+                            disabled
+                            input-type="textarea"
+                            rows="5"
+                            v-model="uiState.dialog.modifyMarker.marker.tips"
+                        ></ui-textfield>
+                    </ui-form-field>
+                    <ui-form-field
                         :class="actionClass"
                         v-show="
                             !uiState.dialog.modifyMarker.loading &&
@@ -470,24 +512,46 @@ onMounted(async () => {
             </ui-form>
         </ui-dialog-content>
     </ui-dialog>
-
-    <single-map
-        id="map"
-        :img-url="campusList[mapState.currentMapId - 1].map.imgUrl"
-        :zoom="4"
-        :size="mapState.size"
-        :markers="mapState.onlyDiff ? mapState.diffMarkers : mapState.markers"
-        @marker-click="onClickMarker"
-        :show-name="mapState.showName"
-    >
-        <ol-context-menu :items="contextMenuItems" />
-    </single-map>
+    <div id="content-box">
+        <div v-if="mapState.loading" id="loading-box">
+            <ui-spinner active></ui-spinner>
+        </div>
+        <single-map
+            id="map"
+            :img-url="campusList[mapState.currentMapId - 1].map.imgUrl"
+            :zoom="4"
+            :size="mapState.size"
+            :markers="
+                mapState.onlyDiff ? mapState.diffMarkers : mapState.markers
+            "
+            @marker-click="onClickMarker"
+            :show-name="mapState.showName"
+        >
+            <ol-context-menu :items="contextMenuItems" />
+        </single-map>
+    </div>
 </template>
 
 <style scope>
 #map {
     height: 100%;
     width: 100%;
+}
+
+#content-box {
+    height: 100%;
+    width: 100%;
+}
+
+#loading-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.36);
+    z-index: 1;
 }
 
 .settings-item {
