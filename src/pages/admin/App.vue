@@ -145,6 +145,16 @@ const mapState = reactive({
     showName: true,
     onlyDiff: false,
     loading: true,
+    loadedMapImg: [],
+    currentMarkers: computed(() => {
+        if (mapState.loading) {
+            return [];
+        }
+        if (mapState.onlyDiff) {
+            return mapState.diffMarkers;
+        }
+        return mapState.markers;
+    }),
 });
 
 const contextMenuItems = reactive([
@@ -275,7 +285,16 @@ onMounted(async () => {
         uiState.dialog.changeToken.open = true;
     } else {
         await updateMarkers();
-        mapState.loading = false;
+        campusList.forEach((campus) => {
+            const img = new Image();
+            img.src = campus.map.imgUrl;
+            img.onload = () => {
+                mapState.loadedMapImg.push(campus.name);
+                if (mapState.loadedMapImg.length == campusList.length) {
+                    mapState.loading = false;
+                }
+            };
+        });
     }
 });
 </script>
@@ -516,24 +535,25 @@ onMounted(async () => {
         <div v-if="mapState.loading" id="loading-box">
             <ui-spinner active></ui-spinner>
         </div>
-        <single-map
-            id="map"
-            :img-url="campusList[mapState.currentMapId - 1].map.imgUrl"
-            :zoom="4"
-            :size="mapState.size"
-            :markers="
-                mapState.onlyDiff ? mapState.diffMarkers : mapState.markers
-            "
-            @marker-click="onClickMarker"
-            :show-name="mapState.showName"
-        >
-            <ol-context-menu :items="contextMenuItems" />
-        </single-map>
+        <template v-for="campus in campusList">
+            <single-map
+                v-if="campus.id == mapState.currentMapId"
+                class="map"
+                :img-url="campus.map.imgUrl"
+                :zoom="4"
+                :size="campus.map.size"
+                :markers="mapState.currentMarkers"
+                @marker-click="onClickMarker"
+                :show-name="mapState.showName"
+            >
+                <ol-context-menu :items="contextMenuItems" />
+            </single-map>
+        </template>
     </div>
 </template>
 
 <style scope>
-#map {
+.map {
     height: 100%;
     width: 100%;
 }
