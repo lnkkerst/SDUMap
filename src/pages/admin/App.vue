@@ -7,7 +7,6 @@ import SingleMap from "@/components/Map.vue";
 
 import campusList from "@/assets/js/campus.js";
 import oldMarkers from "@/assets/js/oldMarkers.js";
-import { b } from "../../../dist/assets/vue3-openlayers.3199590b";
 
 const $alert = useAlert();
 
