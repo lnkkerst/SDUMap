@@ -198,7 +198,7 @@ const updateMarkers = async () => {
         ) {
             diffMarkers.push({
                 color: "yellow",
-                ...bo.get(x),
+                ...bn.get(x),
             });
         }
     }
