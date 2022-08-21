@@ -1,24 +1,44 @@
 {
-    "name": "sdumap",
-    "private": true,
-    "version": "0.0.0",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build",
-        "preview": "vite preview"
-    },
-    "dependencies": {
-        "axios": "^0.27.2",
-        "balm-ui": "9",
-        "minireset.css": "^0.0.7",
-        "pinia": "^2.0.14",
-        "vue": "3.2.30",
-        "vue-cookies": "^1.8.1",
-        "vue-router": "^4.1.1",
-        "vue3-openlayers": "^0.1.68"
-    },
-    "devDependencies": {
-        "@vitejs/plugin-vue": "^2.3.3",
-        "vite": "^2.9.13"
-    }
+  "name": "sdumap",
+  "private": true,
+  "version": "0.0.0",
+  "description": "SDU map official repo.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write ./src",
+    "prepare": "husky install",
+    "lint": "eslint --fix ./src"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "balm-ui": "^10.10.0",
+    "minireset.css": "^0.0.7",
+    "pinia": "^2.0.14",
+    "vue": "3.2.30",
+    "vue-cookies": "^1.8.1",
+    "vue-router": "^4.1.1",
+    "vue3-openlayers": "^0.1.68"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.3",
+    "eslint": "^8.22.0",
+    "eslint-config-alloy": "^4.6.2",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "husky": ">=7",
+    "lint-staged": ">=10",
+    "vite": "^2.9.13",
+    "vite-plugin-pages": "^0.25.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ],
+    "*.html": "prettier --write",
+    "*.vue": "prettier --write",
+    "*.json": "prettier --write"
+  }
 }

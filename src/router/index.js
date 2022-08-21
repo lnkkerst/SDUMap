@@ -1,15 +1,7 @@
-import { createRouter, createWebHashHistory } from "vue-router";
-
-import XinglongshanMap from "../views/maps/XinglongshanMap.vue";
-
-const routes = [
-    {
-        path: "/xinglongshan",
-        component: XinglongshanMap,
-    },
-];
+import { createRouter, createWebHashHistory } from 'vue-router';
+import routes from '~pages';
 
 export default createRouter({
-    history: createWebHashHistory(),
-    routes,
+  history: createWebHashHistory(),
+  routes
 });
